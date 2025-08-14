@@ -327,9 +327,16 @@ impl CpModelBuilder {
     /// assert!(x_val != z_val);
     /// assert!(y_val != z_val);
     /// ```
-    pub fn add_all_different(&mut self, vars: impl IntoIterator<Item = IntVar>) -> Constraint {
+    pub fn add_all_different(&mut self, exprs: impl IntoIterator<Item = LinearExpr>) -> Constraint {
         self.add_cst(CstEnum::AllDiff(proto::AllDifferentConstraintProto {
-            vars: vars.into_iter().map(|v| v.0).collect(),
+            exprs: exprs
+                .into_iter()
+                .map(|expr| proto::LinearExpressionProto {
+                    vars: expr.vars.into_vec(),
+                    coeffs: expr.coeffs.into_vec(),
+                    offset: expr.constant,
+                })
+                .collect(),
         }))
     }
 
@@ -527,36 +534,6 @@ impl CpModelBuilder {
     }
 
     /// Adds a constraint that force the `target` to be equal to the
-    /// minimum of the given `exprs`.
-    ///
-    /// # Exemple
-    ///
-    /// ```
-    /// # use cp_sat::builder::{CpModelBuilder, LinearExpr};
-    /// # use cp_sat::proto::CpSolverStatus;
-    /// let mut model = CpModelBuilder::default();
-    /// let x = model.new_int_var([(0, 10)]);
-    /// let y = model.new_int_var([(5, 15)]);
-    /// let m = model.new_int_var([(-100, 100)]);
-    /// model.add_min_eq(m, [x, y]);
-    /// model.maximize(m);
-    /// let response = model.solve();
-    /// assert_eq!(response.status(), CpSolverStatus::Optimal);
-    /// assert_eq!(10., response.objective_value);
-    /// assert_eq!(10, m.solution_value(&response));
-    /// ```
-    pub fn add_min_eq(
-        &mut self,
-        target: impl Into<LinearExpr>,
-        exprs: impl IntoIterator<Item = impl Into<LinearExpr>>,
-    ) -> Constraint {
-        self.add_cst(CstEnum::LinMin(proto::LinearArgumentProto {
-            target: Some(target.into().into()),
-            exprs: exprs.into_iter().map(|e| e.into().into()).collect(),
-        }))
-    }
-
-    /// Adds a constraint that force the `target` to be equal to the
     /// maximum of the given `exprs`.
     ///
     /// # Exemple
@@ -669,6 +646,10 @@ impl CpModelBuilder {
             offset: expr.constant as f64,
             scaling_factor: 1.,
             domain: vec![],
+            scaling_was_exact: false,
+            integer_before_offset: 0,
+            integer_after_offset: 0,
+            integer_scaling_factor: 1,
         });
     }
 
@@ -698,6 +679,10 @@ impl CpModelBuilder {
             offset: -expr.constant as f64,
             scaling_factor: -1.,
             domain: vec![],
+            integer_before_offset: 0,
+            integer_after_offset: 0,
+            integer_scaling_factor: 1,
+            scaling_was_exact: false,
         });
     }
 
