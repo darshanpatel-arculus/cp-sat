@@ -327,10 +327,14 @@ impl CpModelBuilder {
     /// assert!(x_val != z_val);
     /// assert!(y_val != z_val);
     /// ```
-    pub fn add_all_different(&mut self, exprs: impl IntoIterator<Item = LinearExpr>) -> Constraint {
+    pub fn add_all_different(
+        &mut self,
+        exprs: impl IntoIterator<Item = impl Into<LinearExpr>>,
+    ) -> Constraint {
         self.add_cst(CstEnum::AllDiff(proto::AllDifferentConstraintProto {
             exprs: exprs
                 .into_iter()
+                .map(Into::into)
                 .map(|expr| proto::LinearExpressionProto {
                     vars: expr.vars.into_vec(),
                     coeffs: expr.coeffs.into_vec(),
@@ -342,7 +346,7 @@ impl CpModelBuilder {
 
     /// Adds a linear constraint.
     ///
-    /// # Exemple
+    /// # Example
     ///
     /// ```
     /// # use cp_sat::builder::CpModelBuilder;
@@ -387,7 +391,7 @@ impl CpModelBuilder {
 
     /// Adds an equality constraint between 2 linear expressions.
     ///
-    /// # Exemple
+    /// # Example
     ///
     /// ```
     /// # use cp_sat::builder::{CpModelBuilder, LinearExpr};
@@ -412,7 +416,7 @@ impl CpModelBuilder {
 
     /// Adds a greater or equal constraint between 2 linear expressions.
     ///
-    /// # Exemple
+    /// # Example
     ///
     /// ```
     /// # use cp_sat::builder::{CpModelBuilder, LinearExpr};
@@ -437,7 +441,7 @@ impl CpModelBuilder {
 
     /// Adds a lesser or equal constraint between 2 linear expressions.
     ///
-    /// # Exemple
+    /// # Example
     ///
     /// ```
     /// # use cp_sat::builder::{CpModelBuilder, LinearExpr};
@@ -462,7 +466,7 @@ impl CpModelBuilder {
 
     /// Adds a stricly greater constraint between 2 linear expressions.
     ///
-    /// # Exemple
+    /// # Example
     ///
     /// ```
     /// # use cp_sat::builder::{CpModelBuilder, LinearExpr};
@@ -487,7 +491,7 @@ impl CpModelBuilder {
 
     /// Adds a strictly lesser constraint between 2 linear expressions.
     ///
-    /// # Exemple
+    /// # Example
     ///
     /// ```
     /// # use cp_sat::builder::{CpModelBuilder, LinearExpr};
@@ -512,7 +516,7 @@ impl CpModelBuilder {
 
     /// Adds a not equal constraint between 2 linear expressions.
     ///
-    /// # Exemple
+    /// # Example
     ///
     /// ```
     /// # use cp_sat::builder::{CpModelBuilder, LinearExpr};
@@ -536,7 +540,7 @@ impl CpModelBuilder {
     /// Adds a constraint that force the `target` to be equal to the
     /// maximum of the given `exprs`.
     ///
-    /// # Exemple
+    /// # Example
     ///
     /// ```
     /// # use cp_sat::builder::{CpModelBuilder, LinearExpr};
@@ -649,7 +653,7 @@ impl CpModelBuilder {
             scaling_was_exact: false,
             integer_before_offset: 0,
             integer_after_offset: 0,
-            integer_scaling_factor: 1,
+            integer_scaling_factor: 0,
         });
     }
 
@@ -679,10 +683,10 @@ impl CpModelBuilder {
             offset: -expr.constant as f64,
             scaling_factor: -1.,
             domain: vec![],
+            scaling_was_exact: false,
             integer_before_offset: 0,
             integer_after_offset: 0,
-            integer_scaling_factor: 1,
-            scaling_was_exact: false,
+            integer_scaling_factor: 0,
         });
     }
 
@@ -850,7 +854,7 @@ pub struct Constraint(usize);
 /// It describes an expression in the form `ax+by+c`. Several [From]
 /// and [std::ops] traits are implemented for easy modeling.
 ///
-/// # Exemple
+/// # Example
 ///
 /// Most of the builder methods that takes something linear take in
 /// practice a `impl Into<LinearExpr>`.  In the example, we will use

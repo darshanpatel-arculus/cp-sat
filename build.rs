@@ -4,7 +4,6 @@ const ARCH_BINARIES: &str = "https://github.com/google/or-tools/releases/downloa
 const MACOS_ARM_BINARIES: &str = "https://github.com/google/or-tools/releases/download/v9.14/or-tools_arm64_macOS-15.5_cpp_v9.14.6206.tar.gz";
 
 /// Helper for printing during build.
-#[allow(unused_macros)]
 macro_rules! warn_print {
     ($($tokens: tt)*) => {
         println!("cargo::warning={}", format!($($tokens)*))
@@ -57,6 +56,7 @@ fn main() -> anyhow::Result<()> {
 
     let out_dir = std::path::PathBuf::from(std::env::var("OUT_DIR")?);
     let lib_dir = out_dir.join("ortools");
+    warn_print!("installing ortools lib in {lib_dir:?}");
 
     // Add the precompiled binaries to the OUT_DIR for linking against C++ wrapper.
     if !lib_dir.exists() {
@@ -72,8 +72,11 @@ fn main() -> anyhow::Result<()> {
             .include([lib_dir_str, "/include"].concat())
             .compile("cp_sat_wrapper.a");
 
-        println!("cargo:rustc-link-lib=dylib=ortools");
-        println!("cargo:rustc-link-search=native={}/lib", lib_dir_str);
+        println!("cargo:rustc-link-lib=ortools");
+        println!("cargo:rustc-link-lib=protobuf");
+        // println!("cargo:rustc-link-lib=absl_time");
+        // println!("cargo:rustc-link-lib=absl_flags");
+        println!("cargo:rustc-link-search={}/lib", lib_dir_str);
     }
     Ok(())
 }
