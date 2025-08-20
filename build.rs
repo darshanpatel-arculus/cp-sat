@@ -74,8 +74,6 @@ fn main() -> anyhow::Result<()> {
 
         println!("cargo:rustc-link-lib=ortools");
         println!("cargo:rustc-link-lib=protobuf");
-        // println!("cargo:rustc-link-lib=absl_time");
-        // println!("cargo:rustc-link-lib=absl_flags");
         println!("cargo:rustc-link-search={}/lib", lib_dir_str);
     }
     Ok(())
