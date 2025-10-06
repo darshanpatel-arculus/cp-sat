@@ -14,7 +14,7 @@ fn download_and_extract_binaries(outpath: std::path::PathBuf) -> anyhow::Result<
     let prebuilt_binaries_link = match os_info::get().os_type() {
         // Arch and "derivative" distros
         os_info::Type::Arch | os_info::Type::Manjaro | os_info::Type::EndeavourOS => ARCH_BINARIES,
-        os_info::Type::Debian => DEBIAN_12_BINARIES,
+        os_info::Type::Debian | os_info::Type::Linux => DEBIAN_12_BINARIES,
         os_info::Type::Macos => MACOS_ARM_BINARIES,
         other => unimplemented!("support for {other} operating system is not implemented"),
     };
